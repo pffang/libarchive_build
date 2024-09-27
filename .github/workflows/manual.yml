@@ -36,8 +36,9 @@ jobs:
         path: |
           stage/bin/archive.dll
           stage/bin/bsd*.exe
+          stage/version.txt
 
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      with:
-        body_path: stage/version.txt
+    # - name: Release
+    #   uses: softprops/action-gh-release@v2
+    #   with:
+    #     body_path: stage/version.txt
