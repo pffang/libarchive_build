@@ -2,7 +2,7 @@ if not exist libarchive (
     git clone --depth=1 https://github.com/libarchive/libarchive.git
 )
 
-set TEMP=%ROOT%
+set TEMP=%~dp0
 echo %TEMP%
 SET "ROOT=%TEMP:\=/%"
 echo %ROOT%
