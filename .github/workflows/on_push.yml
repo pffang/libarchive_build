@@ -44,13 +44,15 @@ jobs:
       run: version.cmd
       shell: cmd
 
+    - name: Compressing files
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: compress.cmd
+      shell: cmd
+
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         token: ${{ secrets.RELEASETOKEN }}
         body_path: stage/version.txt
-        files: |
-          stage/bin/archive.dll
-          stage/bin/bsd*.exe
-          stage/version.txt
+        files: stage/bin/libarchive_prebuilt_win_x64.zip
