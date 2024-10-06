@@ -1,5 +1,5 @@
 if not exist libarchive (
-    git clone --depth=1 https://github.com/libarchive/libarchive.git
+    git clone --depth=1 --branch v3.7.6 https://github.com/libarchive/libarchive.git
 )
 
 set TEMP=%~dp0
