@@ -14,17 +14,41 @@ jobs:
       with:
         msbuild-architecture: x64
 
-    - name: Build
+    - name: Building zlib
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: all.cmd
+      run: zlib.cmd
+      shell: cmd
+
+    - name: Building bzip2
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: bzip2.cmd
+      shell: cmd
+    
+    - name: Building xz
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: xz.cmd
+      shell: cmd
+
+    - name: Building zstd
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: zstd.cmd
+      shell: cmd
+
+    - name: Building libarchive
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: libarchive.cmd
+      shell: cmd
+
+    - name: Print versions
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: version.cmd
       shell: cmd
 
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
+        token: ${{ secrets.RELEASETOKEN }}
         body_path: stage/version.txt
         files: |
           stage/bin/archive.dll
