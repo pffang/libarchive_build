@@ -1,18 +1,10 @@
-# This is a basic workflow that is manually triggered
+name: Main
 
-name: Manual workflow
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
-on:
-  workflow_dispatch:
+on: push
 
 jobs:
   build:
-    # The type of runner that the job will run on
     runs-on: windows-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -29,11 +21,12 @@ jobs:
       run: all.cmd
       shell: cmd
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        name: libarchive_Windows_x64_build
-        path: |
+        body_path: stage/version.txt
+        files: |
           stage/bin/archive.dll
           stage/bin/bsd*.exe
           stage/version.txt
