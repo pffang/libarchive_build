@@ -1,6 +1,17 @@
-if not exist bzip2 (
-    git clone --depth=1 https://gitlab.com/bzip2/bzip2.git
+set TEMP=%~dp0
+echo %TEMP%
+SET "ROOT=%TEMP:\=/%"
+echo %ROOT%
+
+if not exist build\bzip2 (
+    git clone --depth=1 -b master --single-branch https://gitlab.com/bzip2/bzip2.git build\bzip2
+) else (
+    cd build\bzip2
+    git pull --depth 1
+    cd %ROOT%
 )
 
-cmake -G "Visual Studio 18 2026" -A x64 --install-prefix %~dp0stage -S bzip2 -B bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
-cmake --build bzip2_build --target INSTALL --config Release
+if exist build\bzip2 (
+    cmake -A x64 --install-prefix %~dp0stage -S build/bzip2 -B build/bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
+    cmake --build build/bzip2_build --target INSTALL --config Release
+)

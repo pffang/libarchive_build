@@ -9,3 +9,6 @@ zstd_build/
 libarchive/
 libarchive_build/
 stage/
+build/
+.vscode/
+.vs/

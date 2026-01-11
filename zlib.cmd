@@ -1,6 +1,17 @@
-if not exist zlib (
-    git clone --depth=1 https://github.com/madler/zlib.git
+set TEMP=%~dp0
+echo %TEMP%
+SET "ROOT=%TEMP:\=/%"
+echo %ROOT%
+
+if not exist build\zlib (
+    git clone --depth=1 -b develop --single-branch https://github.com/madler/zlib.git build\zlib
+) else (
+    cd build\zlib
+    git pull --depth 1
+    cd %ROOT%
 )
 
-cmake -G "Visual Studio 18 2026" -A x64 --install-prefix %~dp0stage -S zlib -B zlib_build -DZLIB_BUILD_EXAMPLES=OFF
-cmake --build zlib_build --target INSTALL --config Release
+if exist build\zlib (
+    cmake -A x64 --install-prefix %~dp0stage -S build/zlib -B build/zlib_build -D CMAKE_BUILD_TYPE="Release" -D ZLIB_BUILD_TESTING=OFF -D ZLIB_BUILD_SHARED=OFF -D ZLIB_BUILD_EXAMPLES=OFF
+    cmake --build build/zlib_build --target INSTALL --config Release
+)
