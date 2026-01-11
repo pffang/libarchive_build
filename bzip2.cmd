@@ -1,4 +1,6 @@
-set ROOT=%~dp0
+set TEMP=%~dp0
+echo %TEMP%
+SET "ROOT=%TEMP:\=/%"
 echo %ROOT%
 
 if not exist bzip2 (
@@ -11,5 +13,5 @@ if exist bzip2 (
     cd %ROOT%
 )
 
-cmake -G "Visual Studio 18 2026" -A x64 --install-prefix %~dp0stage -S bzip2 -B bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
+cmake -A x64 --install-prefix %~dp0stage -S bzip2 -B bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
 cmake --build bzip2_build --target INSTALL --config Release
