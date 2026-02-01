@@ -3,15 +3,20 @@ echo %TEMP%
 SET "ROOT=%TEMP:\=/%"
 echo %ROOT%
 
-if not exist xz (
-    git clone --depth=1 --branch v5.8.2 https://github.com/tukaani-project/xz.git
-)
+set VERSION=v5.8.2
 
-if exist xz (
-    cd xz
-    git checkout -b temp v5.8.2
+if not exist build\xz (
+    git clone --depth=1 -b %VERSION% --single-branch https://github.com/tukaani-project/xz.git build\xz
+) else (
+    cd build\xz
+    git fetch --all --unshallow
+    git checkout -b temp %VERSION%
+    git reset --hard %VERSION%
+    git clean -fdx
     cd %ROOT%
 )
 
-cmake -A x64 --install-prefix %~dp0stage -S xz -B xz_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_NLS=OFF -D ENABLE_SHARED_LIBS=OFF -D XZ_TOOL_XZ=OFF -D XZ_TOOL_XZDEC=OFF -D XZ_TOOL_SCRIPTS=OFF
-cmake --build xz_build --target INSTALL --config Release
+if exist build\xz (
+    cmake -A x64 --install-prefix %~dp0stage -S build/xz -B build/xz_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_NLS=OFF -D BUILD_SHARED_LIBS=OFF -D XZ_DOC=OFF -D XZ_TOOL_LZMADEC=OFF -D XZ_TOOL_LZMAINFO=OFF -D XZ_TOOL_XZ=OFF -D XZ_TOOL_XZDEC=OFF -D XZ_TOOL_SCRIPTS=OFF
+    cmake --build build/xz_build --target INSTALL --config Release
+)

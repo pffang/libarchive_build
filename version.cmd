@@ -1,27 +1,27 @@
-set ROOT=%~dp0
-echo %ROOT%
+set TEMP=%~dp0
+SET "ROOT=%TEMP:\=/%"
 
-cd zlib
-echo zlib version: > ../stage/version.txt
-git show -s --format="%%h" >> ../stage/version.txt
+cd build/zlib
+echo zlib version: > %ROOT%/stage/version.txt
+git show -s --format="%%h" >> %ROOT%/stage/version.txt
 cd %ROOT%
 
-cd bzip2
-echo bzip2 version: >> ../stage/version.txt
-git show -s --format="%%h" >> ../stage/version.txt
+cd build/bzip2
+echo bzip2 version: >> %ROOT%/stage/version.txt
+git show -s --format="%%h" >> %ROOT%/stage/version.txt
 cd %ROOT%
 
-cd xz
-echo xz version: >> ../stage/version.txt
-git show -s --format="%%h" >> ../stage/version.txt
+cd build/xz
+echo xz version: >> %ROOT%/stage/version.txt
+git show -s --format="%%h" >> %ROOT%/stage/version.txt
 cd %ROOT%
 
-cd zstd
-echo zstd version: >> ../stage/version.txt
-git show -s --format="%%h" >> ../stage/version.txt
+cd build/zstd
+echo zstd version: >> %ROOT%/stage/version.txt
+git show -s --format="%%h" >> %ROOT%/stage/version.txt
 cd %ROOT%
 
-cd libarchive
-echo libarchive version: >> ../stage/version.txt
-git show -s --format="%%h" >> ../stage/version.txt
+cd build/libarchive
+echo libarchive version: >> %ROOT%/stage/version.txt
+git show -s --format="%%h" >> %ROOT%/stage/version.txt
 cd %ROOT%

@@ -1,0 +1,317 @@
+From 42e5a3d3f879c1b73d18da6b47c5ec25cfe789d9 Mon Sep 17 00:00:00 2001
+From: Fang Pengfei <pffang@vip.qq.com>
+Date: Sun, 1 Feb 2026 16:27:10 +0800
+Subject: [PATCH] Update to 3.8.5
+
+---
+ .gitignore     |  6 +++---
+ bzip2.cmd      | 39 ++++++++++++++++++++----------------
+ libarchive.cmd | 41 +++++++++++++++++++++-----------------
+ version.cmd    | 54 +++++++++++++++++++++++++-------------------------
+ xz.cmd         | 40 +++++++++++++++++++++----------------
+ zlib.cmd       | 40 +++++++++++++++++++++----------------
+ zstd.cmd       | 41 ++++++++++++++++++++++----------------
+ 7 files changed, 145 insertions(+), 116 deletions(-)
+
+diff --git a/.gitignore b/.gitignore
+index c2c6568..ea10ca4 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -9,6 +9,6 @@ zstd_build/
+ libarchive/
+ libarchive_build/
+ stage/
+-/.vs
+-/.vscode
+-/build
++build/
++.vscode/
++.vs/
+diff --git a/bzip2.cmd b/bzip2.cmd
+index 4ad2e71..db8295b 100644
+--- a/bzip2.cmd
++++ b/bzip2.cmd
+@@ -1,17 +1,22 @@
+-set TEMP=%~dp0
+-echo %TEMP%
+-SET "ROOT=%TEMP:\=/%"
+-echo %ROOT%
+-
+-if not exist bzip2 (
+-    git clone https://gitlab.com/bzip2/bzip2.git
+-)
+-
+-if exist bzip2 (
+-    cd bzip2
+-    git checkout -b temp 1ea1ac188ad4b9cb662e3f8314673c63df95a589
+-    cd %ROOT%
+-)
+-
+-cmake -A x64 --install-prefix %~dp0stage -S bzip2 -B bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
+-cmake --build bzip2_build --target INSTALL --config Release
++set TEMP=%~dp0
++echo %TEMP%
++SET "ROOT=%TEMP:\=/%"
++echo %ROOT%
++
++set VERSION=1ea1ac188ad4b9cb662e3f8314673c63df95a589
++
++if not exist build\bzip2 (
++    git clone -b master --single-branch https://gitlab.com/bzip2/bzip2.git build\bzip2
++) else (
++    cd build\bzip2
++    git fetch --all --unshallow
++    git checkout -b temp %VERSION%
++    git reset --hard %VERSION%
++    git clean -fdx
++    cd %ROOT%
++)
++
++if exist build\bzip2 (
++    cmake -A x64 --install-prefix %~dp0stage -S build/bzip2 -B build/bzip2_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_LIB_ONLY=ON -D ENABLE_SHARED_LIB=OFF -D ENABLE_STATIC_LIB=ON
++    cmake --build build/bzip2_build --target INSTALL --config Release
++)
+diff --git a/libarchive.cmd b/libarchive.cmd
+index b473bc1..64d0d38 100644
+--- a/libarchive.cmd
++++ b/libarchive.cmd
+@@ -1,18 +1,23 @@
+-set TEMP=%~dp0
+-echo %TEMP%
+-SET "ROOT=%TEMP:\=/%"
+-echo %ROOT%
+-
+-if not exist libarchive (
+-    git clone --depth=1 --branch v3.8.5 https://github.com/libarchive/libarchive.git
+-)
+-
+-if exist libarchive (
+-    cd libarchive
+-    git checkout -b temp v3.8.5
+-    cd %ROOT%
+-)
+-
+-cmake -A x64 --install-prefix "%ROOT%stage" -S libarchive -B libarchive_build -D CMAKE_BUILD_TYPE="Release" -D ZLIB_LIBRARY="%ROOT%stage/lib/zlibstatic.lib" -D ZLIB_INCLUDE_DIR=stage/include -D BZIP2_LIBRARIES="%ROOT%stage/lib/bz2_static.lib" -D BZIP2_INCLUDE_DIR=stage/include -D LIBLZMA_LIBRARY="%ROOT%stage/lib/lzma.lib" -D LIBLZMA_INCLUDE_DIR=stage/include -D ZSTD_LIBRARY="%ROOT%stage/lib/zstd_static.lib" -D ZSTD_INCLUDE_DIR=stage/include
+-cmake --build libarchive_build --target ALL_BUILD --config Release
+-cmake --build libarchive_build --target INSTALL --config Release
++set TEMP=%~dp0
++echo %TEMP%
++SET "ROOT=%TEMP:\=/%"
++echo %ROOT%
++
++set VERSION=v3.8.5
++
++if not exist libarchive (
++    git clone --depth=1 -b %VERSION% --single-branch https://github.com/libarchive/libarchive.git build\libarchive
++) else (
++    cd build\libarchive
++    git fetch --all --unshallow
++    git checkout -b temp %VERSION%
++    git reset --hard %VERSION%
++    git clean -fdx
++    cd %ROOT%
++)
++
++if exist build\libarchive (
++    cmake -A x64 --install-prefix "%ROOT%stage" -S build/libarchive -B build/libarchive_build -D CMAKE_BUILD_TYPE="Release" -D ZLIB_LIBRARY="%ROOT%stage/lib/zs.lib" -D ZLIB_INCLUDE_DIR=stage/include -D BZIP2_LIBRARIES="%ROOT%stage/lib/bz2_static.lib" -D BZIP2_INCLUDE_DIR=stage/include -D LZMA_API_STATIC=ON -D LIBLZMA_LIBRARY="%ROOT%stage/lib/lzma.lib" -D LIBLZMA_INCLUDE_DIR=stage/include -D ZSTD_LIBRARY="%ROOT%stage/lib/zstd_static.lib" -D ZSTD_INCLUDE_DIR=stage/include -D ENABLE_OPENSSL=OFF
++    cmake --build build/libarchive_build --target ALL_BUILD --config Release
++    cmake --build build/libarchive_build --target INSTALL --config Release
++)
+diff --git a/version.cmd b/version.cmd
+index 82c121b..31fb8f4 100644
+--- a/version.cmd
++++ b/version.cmd
+@@ -1,27 +1,27 @@
+-set ROOT=%~dp0
+-echo %ROOT%
+-
+-cd zlib
+-echo zlib version: > ../stage/version.txt
+-git show -s --format="%%h" >> ../stage/version.txt
+-cd %ROOT%
+-
+-cd bzip2
+-echo bzip2 version: >> ../stage/version.txt
+-git show -s --format="%%h" >> ../stage/version.txt
+-cd %ROOT%
+-
+-cd xz
+-echo xz version: >> ../stage/version.txt
+-git show -s --format="%%h" >> ../stage/version.txt
+-cd %ROOT%
+-
+-cd zstd
+-echo zstd version: >> ../stage/version.txt
+-git show -s --format="%%h" >> ../stage/version.txt
+-cd %ROOT%
+-
+-cd libarchive
+-echo libarchive version: >> ../stage/version.txt
+-git show -s --format="%%h" >> ../stage/version.txt
+-cd %ROOT%
++set TEMP=%~dp0
++SET "ROOT=%TEMP:\=/%"
++
++cd build/zlib
++echo zlib version: > %ROOT%/stage/version.txt
++git show -s --format="%%h" >> %ROOT%/stage/version.txt
++cd %ROOT%
++
++cd build/bzip2
++echo bzip2 version: >> %ROOT%/stage/version.txt
++git show -s --format="%%h" >> %ROOT%/stage/version.txt
++cd %ROOT%
++
++cd build/xz
++echo xz version: >> %ROOT%/stage/version.txt
++git show -s --format="%%h" >> %ROOT%/stage/version.txt
++cd %ROOT%
++
++cd build/zstd
++echo zstd version: >> %ROOT%/stage/version.txt
++git show -s --format="%%h" >> %ROOT%/stage/version.txt
++cd %ROOT%
++
++cd build/libarchive
++echo libarchive version: >> %ROOT%/stage/version.txt
++git show -s --format="%%h" >> %ROOT%/stage/version.txt
++cd %ROOT%
+diff --git a/xz.cmd b/xz.cmd
+index 62844d8..0d7401e 100644
+--- a/xz.cmd
++++ b/xz.cmd
+@@ -1,17 +1,23 @@
+-set TEMP=%~dp0
+-echo %TEMP%
+-SET "ROOT=%TEMP:\=/%"
+-echo %ROOT%
+-
+-if not exist xz (
+-    git clone --depth=1 --branch v5.8.2 https://github.com/tukaani-project/xz.git
+-)
+-
+-if exist xz (
+-    cd xz
+-    git checkout -b temp v5.8.2
+-    cd %ROOT%
+-)
+-
+-cmake -A x64 --install-prefix %~dp0stage -S xz -B xz_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_NLS=OFF -D ENABLE_SHARED_LIBS=OFF -D XZ_TOOL_XZ=OFF -D XZ_TOOL_XZDEC=OFF -D XZ_TOOL_SCRIPTS=OFF
+-cmake --build xz_build --target INSTALL --config Release
++set TEMP=%~dp0
++echo %TEMP%
++SET "ROOT=%TEMP:\=/%"
++echo %ROOT%
++
++set VERSION=v5.8.2
++
++if not exist build\xz (
++    git clone --depth=1 -b %VERSION% --single-branch https://github.com/tukaani-project/xz.git build\xz
++    git switch -c %VERSION%
++) else (
++    cd build\xz
++    git fetch --all --unshallow
++    git checkout -b temp %VERSION%
++    git reset --hard %VERSION%
++    git clean -fdx
++    cd %ROOT%
++)
++
++if exist build\xz (
++    cmake -A x64 --install-prefix %~dp0stage -S build/xz -B build/xz_build -D CMAKE_BUILD_TYPE="Release" -D ENABLE_NLS=OFF -D BUILD_SHARED_LIBS=OFF -D XZ_DOC=OFF -D XZ_TOOL_LZMADEC=OFF -D XZ_TOOL_LZMAINFO=OFF -D XZ_TOOL_XZ=OFF -D XZ_TOOL_XZDEC=OFF -D XZ_TOOL_SCRIPTS=OFF
++    cmake --build build/xz_build --target INSTALL --config Release
++)
+diff --git a/zlib.cmd b/zlib.cmd
+index cb4234b..114456f 100644
+--- a/zlib.cmd
++++ b/zlib.cmd
+@@ -1,17 +1,23 @@
+-set TEMP=%~dp0
+-echo %TEMP%
+-SET "ROOT=%TEMP:\=/%"
+-echo %ROOT%
+-
+-if not exist zlib (
+-    git clone --depth=1 --branch v1.3.1 https://github.com/madler/zlib.git
+-)
+-
+-if exist zlib (
+-    cd zlib
+-    git checkout -b temp v1.3.1
+-    cd %ROOT%
+-)
+-
+-cmake -A x64 --install-prefix %~dp0stage -S zlib -B zlib_build -DZLIB_BUILD_EXAMPLES=OFF
+-cmake --build zlib_build --target INSTALL --config Release
++set TEMP=%~dp0
++echo %TEMP%
++SET "ROOT=%TEMP:\=/%"
++echo %ROOT%
++
++set VERSION=v1.3.1.2
++
++if not exist build\zlib (
++    git clone --depth=1 -b %VERSION% --single-branch https://github.com/madler/zlib.git build\zlib
++    git switch -c %VERSION%
++) else (
++    cd build\zlib
++    git fetch --all --unshallow
++    git checkout -b temp %VERSION%
++    git reset --hard %VERSION%
++    git clean -fdx
++    cd %ROOT%
++)
++
++if exist build\zlib (
++    cmake -A x64 --install-prefix %~dp0stage -S build/zlib -B build/zlib_build -D CMAKE_BUILD_TYPE="Release" -D ZLIB_BUILD_TESTING=OFF -D ZLIB_BUILD_SHARED=OFF -D ZLIB_BUILD_EXAMPLES=OFF
++    cmake --build build/zlib_build --target INSTALL --config Release
++)
+diff --git a/zstd.cmd b/zstd.cmd
+index 6510436..0c22c28 100644
+--- a/zstd.cmd
++++ b/zstd.cmd
+@@ -1,17 +1,24 @@
+-set TEMP=%~dp0
+-echo %TEMP%
+-SET "ROOT=%TEMP:\=/%"
+-echo %ROOT%
+-
+-if not exist zstd (
+-    git clone --depth=1 --branch v1.5.7 https://github.com/facebook/zstd.git
+-)
+-
+-if exist zstd (
+-    cd zstd
+-    git checkout -b temp v1.5.7
+-    cd %ROOT%
+-)
+-
+-cmake -A x64 --install-prefix %~dp0stage -S zstd/build/cmake -B zstd_build -D CMAKE_BUILD_TYPE="Release" -D ZSTD_BUILD_STATIC=ON -D ZSTD_BUILD_SHARED=OFF -D ZSTD_BUILD_PROGRAMS=OFF -D ZSTD_BUILD_TESTS=OFF -D ZSTD_BUILD_CONTRIB=OFF
+-cmake --build zstd_build --target INSTALL --config Release
++set TEMP=%~dp0
++echo %TEMP%
++SET "ROOT=%TEMP:\=/%"
++echo %ROOT%
++
++set VERSION=v1.5.7
++
++if not exist build\zstd (
++    git clone --depth=1 -b %VERSION% --single-branch https://github.com/facebook/zstd.git build\zstd
++    git switch -c %VERSION%
++) else (
++    cd build\zstd
++    git fetch --all --unshallow
++    git checkout -b temp %VERSION%
++    git reset --hard %VERSION%
++    git clean -fdx
++    cd %ROOT%
++)
++
++if exist build\zstd (
++    cmake -A x64 --install-prefix %~dp0stage -S build/zstd/build/cmake -B build/zstd_build -D CMAKE_BUILD_TYPE="Release" -D ZSTD_BUILD_STATIC=ON -D ZSTD_BUILD_SHARED=OFF -D ZSTD_BUILD_PROGRAMS=OFF -D ZSTD_BUILD_TESTS=OFF -D ZSTD_BUILD_CONTRIB=OFF
++    cmake --build build/zstd_build --target ALL_BUILD --config Release
++    cmake --build build/zstd_build --target INSTALL --config Release
++)
+-- 
+2.52.0.windows.1
+
