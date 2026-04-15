@@ -1,3 +1,4 @@
+@echo off
 call zlib.cmd
 call bzip2.cmd
 call xz.cmd
